@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { Button } from "@heroui/react";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
@@ -24,9 +21,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${outfit.variable} font-sans`}>
+        <div className="p-4 flex items-center justify-between w-[80%] mx-auto">
+          <Button variant="ghost" className="text-xl font-bold">
+            StudyFlow
+          </Button>
+          <div>
+            <Button variant="ghost" className="text-md font-semibold">
+              Dashboard
+            </Button>
+            <Button variant="ghost" className="text-md font-semibold">
+              Reflections
+            </Button>
+          </div>
+          <Button variant="danger-soft" className="text-md font-semibold">
+            Logout
+          </Button>
+        </div>
         {children}
       </body>
     </html>
