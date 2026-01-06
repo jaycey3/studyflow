@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${outfit.variable} font-sans`}>
-        <div className="p-4 flex items-center justify-between w-[80%] mx-auto">
+        <div className="py-4 flex items-center justify-between w-[80%] mx-auto">
           <Button variant="ghost" className="text-xl font-bold">
             StudyFlow
           </Button>
