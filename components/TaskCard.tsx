@@ -1,19 +1,97 @@
-import { Card, Chip, Button } from "@heroui/react";
-import { Trash, SquarePen, Check } from "lucide-react";
+"use client";
 
-export default function TaskCard() {
+import { Card, Chip, Button, Select, ListBox } from "@heroui/react";
+import { Trash, SquarePen, Circle, CircleMinus, Check, CircleAlert, TriangleAlert, Loader2 } from "lucide-react";
+import { useState } from "react";
+
+type TaskCardProps = {
+    priority: "low" | "medium" | "high";
+    status: "todo" | "doing" | "done";
+    title: string;
+    description: string;
+}
+
+export default function TaskCard(props: TaskCardProps) {
+    const [selectedPriority, setSelectedPriority] = useState<TaskCardProps["priority"]>(props.priority);
+    const [selectedStatus, setSelectedStatus] = useState<TaskCardProps["status"]>(props.status);
+
+    const priorityConfig = {
+        low: {
+            label: "Low",
+            className: "bg-blue-100 text-blue-500",
+            icon: <CircleMinus size={16} strokeWidth={3} />
+        },
+        medium: {
+            label: "Medium",
+            className: "bg-amber-100 text-amber-500",
+            icon: <TriangleAlert size={16} strokeWidth={3} />
+        },
+        high: {
+            label: "High",
+            className: "bg-red-100 text-red-500",
+            icon: <CircleAlert size={16} strokeWidth={3} />
+        }
+    };
+
+    const statusConfig = {
+        todo: {
+            label: "To Do",
+            className: "bg-gray-100 text-gray-500",
+            icon: <Circle size={16} strokeWidth={3} />
+        },
+        doing: {
+            label: "Doing",
+            className: "bg-amber-100 text-amber-500",
+            icon: <Loader2 size={16} strokeWidth={3} className="animate-spin" />
+        },
+        done: {
+            label: "Done",
+            className: "bg-green-100 text-green-500",
+            icon: <Check size={16} strokeWidth={3} />
+        }
+    };
+
+    const selectedStatusConfig = statusConfig[selectedStatus];
+    const selectedPriorityConfig = priorityConfig[selectedPriority];
+
     return (
         <Card className="min-w-0">
             <Card.Header>
                 <div className="flex flex-row gap-3">
-                    <Chip variant="soft" className="bg-green-100 text-green-500"><Check size={14} strokeWidth={3} /> Done</Chip>
-                    <Chip variant="soft" className="bg-amber-100 text-amber-500">Medium</Chip>
+                    <Select defaultValue={selectedPriority} onChange={(key) => setSelectedPriority(key as TaskCardProps["priority"])}>
+                        <Select.Trigger className={`${selectedPriorityConfig.className} w-26`} aria-label="Change Priority">
+                            <Select.Value className="flex items-center gap-2">
+                                {selectedPriorityConfig.icon} {selectedPriorityConfig.label}
+                            </Select.Value>
+                        </Select.Trigger>
+                        <Select.Popover>
+                            <ListBox>
+                                <ListBox.Item id="low" className="text-blue-500"><CircleMinus size={16} strokeWidth={3} /> Low</ListBox.Item>
+                                <ListBox.Item id="medium" className="text-amber-500"><TriangleAlert size={16} strokeWidth={3} /> Medium</ListBox.Item>
+                                <ListBox.Item id="high" className="text-red-500"><CircleAlert size={16} strokeWidth={3} /> High</ListBox.Item>
+                            </ListBox>
+                        </Select.Popover>
+                    </Select>
+                    <Select defaultValue={selectedStatus} onChange={(key) => setSelectedStatus(key as TaskCardProps["status"])}>
+                        <Select.Trigger className={`${selectedStatusConfig.className} w-26`} aria-label="Change Status">
+                            <Select.Value className="flex items-center gap-2">
+                                {selectedStatusConfig.icon} {selectedStatusConfig.label}
+                            </Select.Value>
+                        </Select.Trigger>
+                        <Select.Popover>
+                            <ListBox>
+                                <ListBox.Item id="todo" className="text-gray-500"><Circle size={16} strokeWidth={3} /> To Do</ListBox.Item>
+                                <ListBox.Item id="doing" className="text-amber-500"><Loader2 size={16} strokeWidth={3} />Doing</ListBox.Item>
+                                <ListBox.Item id="done" className="text-green-500"><Check size={16} strokeWidth={3} /> Done</ListBox.Item>
+                            </ListBox>
+                        </Select.Popover>
+                    </Select>
                 </div>
             </Card.Header>
             <Card.Content className="flex-row justify-between items-center">
                 <div>
-                    <Card.Title>Task Title</Card.Title>
-                    <Card.Description>Task Description</Card.Description>
+                    <Card.Title>{props.title}</Card.Title>
+                    <Card.Description>{props.description}</Card.Description>
                 </div>
                 <div className="flex flex-row gap-2">
                     <Button size="sm" variant="ghost" className=" text-amber-500 hover:bg-orange-50" isIconOnly><SquarePen /></Button>

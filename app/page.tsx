@@ -1,4 +1,4 @@
-import { Tabs, Card, Chip, Button } from "@heroui/react";
+import { Tabs, Card, Chip, Button, Separator} from "@heroui/react";
 import { Trash, SquarePen } from "lucide-react";
 
 import TaskCard from "@/components/TaskCard";
@@ -60,9 +60,10 @@ export default function Home() {
           </Tabs.Panel>
           <Tabs.Panel className="pt-4 overflow-visible" id="today">
             <div className="grid grid-cols-3 gap-4">
-              <TaskCard />
-              <TaskCard />
-              <TaskCard />            
+              <TaskCard title="Task 1" description="Description 1" priority="low" status="todo" />
+              
+              <TaskCard title="Task 2" description="Description 2" priority="medium" status="doing" />
+              <TaskCard title="Task 3" description="Description 3" priority="high" status="done" />            
             </div>
           </Tabs.Panel>
           <Tabs.Panel className="pt-4" id="tomorrow">
