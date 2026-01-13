@@ -8,7 +8,7 @@ export default function DailyProgress() {
                 <h3 className="text-gray-100 font-bold text-sm mb-2">Daily Goal</h3>
                 <div className="flex items-center gap-4 mb-1">
                     <div className="bg-blue-500 rounded-2xl p-2">
-                        <Goal className="text-white" size={32} />
+                        <Goal className="text-white" size={32} strokeWidth={2}/>
                     </div>
                     <div className="w-full">
                         <h2 className="text-white text-2xl font-bold mb-2">40% Complete</h2>
