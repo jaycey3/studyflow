@@ -7,7 +7,7 @@ export default function FocusIntensity() {
             <Card.Content>
                 <h3 className="text-neutral-700 font-bold text-sm mb-2">Focus Intensity</h3>
                 <div className="flex items-center gap-4 mb-1">
-                    <div className="bg-red-200 rounded-2xl p-2">
+                    <div className="bg-red-100 rounded-2xl p-2">
                         <TrendingUp className="text-red-600" size={32} strokeWidth={2}/>
                     </div>
                     <div className="w-full">

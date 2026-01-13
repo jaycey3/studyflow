@@ -18,17 +18,17 @@ export default function TaskCard(props: TaskCardProps) {
     const priorityConfig = {
         low: {
             label: "Low",
-            className: "text-blue-500 bg-blue-100",
+            className: "text-blue-600 bg-blue-100",
             icon: <CircleMinus size={16} strokeWidth={3} />
         },
         medium: {
             label: "Medium",
-            className: "text-amber-500 bg-amber-100",
+            className: "text-amber-600 bg-amber-100",
             icon: <TriangleAlert size={16} strokeWidth={3} />
         },
         high: {
             label: "High",
-            className: "text-red-500 bg-red-100",
+            className: "text-red-600 bg-red-100",
             icon: <CircleAlert size={16} strokeWidth={3} />
         }
     };
@@ -36,17 +36,17 @@ export default function TaskCard(props: TaskCardProps) {
     const statusConfig = {
         todo: {
             label: "To Do",
-            className: "text-gray-500 bg-gray-100",
+            className: "text-gray-600 bg-gray-100",
             icon: <Circle size={16} strokeWidth={3} />
         },
         doing: {
             label: "Doing",
-            className: "text-amber-500 bg-amber-100",
+            className: "text-amber-600 bg-amber-100",
             icon: <Loader2 size={16} strokeWidth={3} className="animate-spin" />
         },
         done: {
             label: "Done",
-            className: "text-green-500 bg-green-100",
+            className: "text-green-600 bg-green-100",
             icon: <Check size={16} strokeWidth={3} />
         }
     };
@@ -56,45 +56,45 @@ export default function TaskCard(props: TaskCardProps) {
 
     return (
         <Card className="min-w-0 p-4">
-            <Card.Content className="grid grid-cols-[5%_70%_15%] gap-10 ">
-                <div className="justify-center flex items-center">
-                    <Select defaultValue={selectedStatus} onChange={(key) => setSelectedStatus(key as TaskCardProps["status"])}>
-                        <Select.Trigger className={`${selectedStatusConfig.className} bg-transparent `} aria-label="Change Status">
-                            <Button isIconOnly className={`${selectedStatusConfig.className}`} >
-                                {selectedStatusConfig.icon}
-                            </Button>
-                        </Select.Trigger>
-                        <Select.Popover>
-                            <ListBox>
-                                <ListBox.Item id="todo" className="text-gray-500 hover:bg-gray-100"><Circle size={16} strokeWidth={3} /> To Do</ListBox.Item>
-                                <ListBox.Item id="doing" className="text-amber-500 hover:bg-amber-100"><Loader2 size={16} strokeWidth={3} />Doing</ListBox.Item>
-                                <ListBox.Item id="done" className="text-green-500 hover:bg-green-100"><Check size={16} strokeWidth={3} /> Done</ListBox.Item>
-                            </ListBox>
-                        </Select.Popover>
-                    </Select>
-                </div>
-                <div>
-                    <Select defaultValue={selectedPriority} onChange={(key) => setSelectedPriority(key as TaskCardProps["priority"])}>
-                        <Select.Trigger className={`${selectedPriorityConfig.className} bg-transparent w-8 p-0`} aria-label="Change Priority">
-                            <Chip className={`${selectedPriorityConfig.className} h-7`} size="md">
-                                {selectedPriorityConfig.icon} {selectedPriorityConfig.label}
-                            </Chip>
-                        </Select.Trigger>
-                        <Select.Popover>
-                            <ListBox>
-                                <ListBox.Item id="low" className="text-blue-500 hover:bg-blue-100"><CircleMinus size={16} strokeWidth={3} /> Low</ListBox.Item>
-                                <ListBox.Item id="medium" className="text-amber-500 hover:bg-amber-100"><TriangleAlert size={16} strokeWidth={3} /> Medium</ListBox.Item>
-                                <ListBox.Item id="high" className="text-red-500 hover:bg-red-100"><CircleAlert size={16} strokeWidth={3} /> High</ListBox.Item>
-                            </ListBox>
-                        </Select.Popover>
-                    </Select>
-                    <div className="ml-1">
+            <Card.Content className="grid grid-cols-2 p-2">
+                <div className="">
+                    <div className="flex items-center gap-2">
+                        <Select defaultValue={selectedStatus} onChange={(key) => setSelectedStatus(key as TaskCardProps["status"])}>
+                            <Select.Trigger className={`${selectedStatusConfig.className} bg-transparent w-auto p-0`} aria-label="Change Status">
+                                <Chip className={`${selectedStatusConfig.className} h-7`} size="md">
+                                    {selectedStatusConfig.icon} {selectedStatusConfig.label}
+                                </Chip>
+                            </Select.Trigger>
+                            <Select.Popover>
+                                <ListBox>
+                                    <ListBox.Item id="todo" className="text-gray-600 hover:bg-gray-100"><Circle size={16} strokeWidth={3} /> To Do</ListBox.Item>
+                                    <ListBox.Item id="doing" className="text-amber-600 hover:bg-amber-100"><Loader2 size={16} strokeWidth={3} />Doing</ListBox.Item>
+                                    <ListBox.Item id="done" className="text-green-600 hover:bg-green-100"><Check size={16} strokeWidth={3} /> Done</ListBox.Item>
+                                </ListBox>
+                            </Select.Popover>
+                        </Select>
+                        <Select defaultValue={selectedPriority} onChange={(key) => setSelectedPriority(key as TaskCardProps["priority"])}>
+                            <Select.Trigger className={`${selectedPriorityConfig.className} bg-transparent w-auto p-0`} aria-label="Change Priority">
+                                <Chip className={`${selectedPriorityConfig.className} h-7`} size="md">
+                                    {selectedPriorityConfig.icon} {selectedPriorityConfig.label}
+                                </Chip>
+                            </Select.Trigger>
+                            <Select.Popover>
+                                <ListBox>
+                                    <ListBox.Item id="low" className="text-blue-600 hover:bg-blue-100"><CircleMinus size={16} strokeWidth={3} /> Low</ListBox.Item>
+                                    <ListBox.Item id="medium" className="text-amber-600 hover:bg-amber-100"><TriangleAlert size={16} strokeWidth={3} /> Medium</ListBox.Item>
+                                    <ListBox.Item id="high" className="text-red-600 hover:bg-red-100"><CircleAlert size={16} strokeWidth={3} /> High</ListBox.Item>
+                                </ListBox>
+                            </Select.Popover>
+                        </Select>
+                    </div>
+                    <div>
                         <Card.Title className="text-lg">{props.title}</Card.Title>
                         <Card.Description className="text-base">{props.description}</Card.Description>
                     </div>
                 </div>
                 <div className="flex flex-col items-end">
-                    <Chip size="md">
+                    <Chip size="md" className="w-auto">
                         <CalendarClock size={16} strokeWidth={2} />
                         <span>Feb 20</span>
                     </Chip>
