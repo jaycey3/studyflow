@@ -1,7 +1,7 @@
 import { GraduationCap, CalendarCheck, NotebookPen, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { logout } from "@/app/auth/actions";
+import { logout } from "@/lib/auth/actions";
 import { createClient } from "@/lib/supabase/server";
 
 export async function Navbar() {

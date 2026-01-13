@@ -2,7 +2,7 @@
 
 import { useState, useActionState, useEffect } from "react";
 import { Button, Card, Form, Input, Label, TextField, Modal, InputOTP } from "@heroui/react";
-import { sendEmail, type SendEmailState, login } from "../auth/actions";
+import { sendEmail, type SendEmailState, login } from "@/lib/auth/actions";
 import { CheckCircle, XCircle } from "lucide-react";
 
 const initialState: SendEmailState = { status: "idle" };
