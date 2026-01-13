@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 export function AddTaskModal() {
     return (
         <Modal>
-            <Button className="bg-neutral-900" size="lg">
+            <Button className="bg-blue-600" size="lg">
                 <Plus size={16} strokeWidth={3} />
                 Add Task
             </Button>
