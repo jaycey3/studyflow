@@ -9,7 +9,11 @@ import type { DateValue } from "@internationalized/date";
 import { addTask, SubmitState } from "@/lib/tasks/actions";
 const initialState: SubmitState = { status: "idle" };
 
-export function AddTaskModal() {
+type AddTaskModalProps = {
+    onSuccess?: () => void;
+}
+
+export function AddTaskModal({ onSuccess }: AddTaskModalProps) {
     const [submitState, addTaskAction, isSubmitting] = useActionState(addTask, initialState);
     const [showToast, setShowToast] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +35,7 @@ export function AddTaskModal() {
                 setPriority("");
                 setStatus("todo");
                 setIsOpen(false);
+                onSuccess?.()
             }
 
             const timer = setTimeout(() => {

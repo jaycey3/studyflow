@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, Chip, Button, Select, ListBox } from "@heroui/react";
-import { Trash, SquarePen, Circle, CircleMinus, Check, CircleAlert, TriangleAlert, Loader2, Clock } from "lucide-react";
+import { Card, Chip } from "@heroui/react";
+import { Circle, CircleMinus, Check, CircleAlert, TriangleAlert, Loader2, Clock } from "lucide-react";
 import { useState } from "react";
 
 type UpcomingTaskCardProps = {
@@ -9,7 +9,9 @@ type UpcomingTaskCardProps = {
     status: "todo" | "doing" | "done";
     title: string;
     description: string;
+    dueDate: string;
 }
+
 
 export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
     const [selectedPriority, setSelectedPriority] = useState<UpcomingTaskCardProps["priority"]>(props.priority);
@@ -54,6 +56,11 @@ export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
     const selectedStatusConfig = statusConfig[selectedStatus];
     const selectedPriorityConfig = priorityConfig[selectedPriority];
 
+    const formattedDueDate = new Date(props.dueDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+    });
+
     return (
         <Card className="min-w-0 p-4">
             <Card.Content className="">
@@ -68,7 +75,7 @@ export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
                     </div>
                     <div className="flex flex-row gap-1 items-center">
                         <Clock size={14} strokeWidth={2} />
-                        <span className="text-sm">Feb 20</span>
+                        <span className="text-sm">{formattedDueDate}</span>
                     </div>
                 </div>
                 <div>

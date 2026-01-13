@@ -9,6 +9,7 @@ type TaskCardProps = {
     status: "todo" | "doing" | "done";
     title: string;
     description: string;
+    dueDate: string;
 }
 
 export default function TaskCard(props: TaskCardProps) {
@@ -54,6 +55,11 @@ export default function TaskCard(props: TaskCardProps) {
     const selectedStatusConfig = statusConfig[selectedStatus];
     const selectedPriorityConfig = priorityConfig[selectedPriority];
 
+    const formattedDueDate = new Date(props.dueDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+    });
+
     return (
         <Card className="min-w-0 p-4">
             <Card.Content className="grid grid-cols-2 p-2">
@@ -96,7 +102,7 @@ export default function TaskCard(props: TaskCardProps) {
                 <div className="flex flex-col items-end">
                     <Chip size="md" className="w-auto">
                         <CalendarClock size={16} strokeWidth={2} />
-                        <span>Feb 20</span>
+                        <span>{formattedDueDate}</span>
                     </Chip>
                 </div>
             </Card.Content>
