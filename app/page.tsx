@@ -138,14 +138,14 @@ export default function Home() {
         <Tabs.ListContainer className="relative w-full">
           <div
             className={[
-              "absolute -top-8 left-1/2 -translate-x-1/2 z-10 transition-all duration-200",
+              "absolute -top-10 left-1/2 -translate-x-1/2 z-10 transition-all duration-200",
               isTodaySelected ? "opacity-0 pointer-events-none translate-y-1" : "opacity-100 translate-y-0"
             ].join(" ")}
           >
             <Button
               size="sm"
               variant="primary"
-              className="shadow-sm"
+              className="shadow-sm bg-blue-600"
               onPress={() => setSelectedKey(todayKey)}
             >
               Today
@@ -158,7 +158,7 @@ export default function Home() {
             </Button>
 
             <div className="flex justify-center">
-              <Tabs.List className="h-24 gap-5 bg-transparent flex justify-center w-fit mx-auto gap-5">
+              <Tabs.List className="h-24 gap-5 bg-transparent flex justify-center w-fit mx-auto">
                 {days.map(day => (
                   <Tabs.Tab
                     key={day.key}
