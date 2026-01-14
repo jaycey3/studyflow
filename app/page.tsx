@@ -14,6 +14,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import type { Task } from "@/lib/tasks/actions";
 import type { SubmitState } from "@/lib/tasks/actions";
 import { today } from "@internationalized/date";
+import { get } from "http";
 
 type SelectedTask = {
   id: number;
@@ -42,6 +43,7 @@ export default function Home() {
   const [selectedTask, setSelectedTask] = useState<SelectedTask | null>(null);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastState, setToastState] = useState<SubmitState>({ status: "idle" });
+  const [greeting, setGreeting] = useState(() => getGreeting());
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [upcoming, setUpcoming] = useState<Task[]>([]);
@@ -49,6 +51,14 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
 
   const todayKey = useMemo(() => toDateKeyLocal(new Date()), []);
+
+  function getGreeting(date = new Date()) {
+    const hour = date.getHours();
+    if (hour < 6) return "Good Night";
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  }
 
   function getWindowAround(center: Date) {
     return Array.from({ length: 9 }, (_, i) => {
@@ -191,8 +201,16 @@ export default function Home() {
   }, [applyMutation]);
 
   useEffect(() => {
+    const tick = () => setGreeting(getGreeting());
+
+    tick();
+
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
     setSelectedKey(toDateKeyLocal(new Date()));
-    // setDays(getWindowAround(now));
   }, []);
 
   const days = useMemo(() => {
@@ -227,7 +245,7 @@ export default function Home() {
   return (
     <div className="w-full flex flex-col gap-5 mt-5">
       <div className="flex items-center justify-between my-5">
-        <h1 className="text-4xl font-semibold mb-2">Good Morning, Jaycey! 👋</h1>
+        <h1 className="text-4xl font-semibold mb-2">{greeting}, Jaycey! 👋</h1>
         <AddTaskModal onResult={handleResult} />
         {editOpen && (
           <EditTaskModal isOpen={editOpen} onOpenChange={setEditOpen} task={selectedTask} onResult={handleResult} />
