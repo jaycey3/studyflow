@@ -45,6 +45,7 @@ export default function Home() {
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [upcoming, setUpcoming] = useState<Task[]>([]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -107,6 +108,7 @@ export default function Home() {
       const id = state.deletedId;
       setTasks((cur) => removeById(cur, id));
       setUpcoming((cur) => removeById(cur, id));
+      setAllTasks((cur) => removeById(cur, id));
       return;
     }
 
@@ -127,6 +129,7 @@ export default function Home() {
         const next = upsert(cur, task);
         return next.slice(0, 5);
       })
+      setAllTasks((cur) => upsert(cur, task));
     }
   }, [selectedKey, todayKey]);
 
@@ -166,6 +169,25 @@ export default function Home() {
         setUpcoming((data ?? []) as Task[]);
       } catch {
         setUpcoming([]);
+      }
+    })
+  }
+
+  const fetchAllTasks = () => {
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/tasks/all`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error((await res.json()).error ?? "Failed to fetch all tasks.");
+        }
+        const data = await res.json();
+        setAllTasks((data ?? []) as Task[]);
+      } catch {
+        setAllTasks([]);
       }
     })
   }
@@ -215,6 +237,10 @@ export default function Home() {
     if (!selectedKey) return [];
     return getWindowAround(fromDateKeyLocal(selectedKey));
   }, [selectedKey]);
+
+  useEffect(() => {
+    fetchAllTasks();
+  }, []);
 
   useEffect(() => {
     if (!selectedKey) return;
@@ -305,8 +331,8 @@ export default function Home() {
           <Tabs.Panel key={day.key} id={day.key} className="pt-4">
             <div className="grid grid-cols-3 gap-5 mb-4">
               <DailyProgress tasks={tasks} />
-              <FocusIntensity />
-              <StatusCard />
+              <FocusIntensity tasks={tasks} />
+              <StatusCard tasks={allTasks} />
             </div>
 
             <div className="grid grid-cols-[2fr_1fr] gap-5">

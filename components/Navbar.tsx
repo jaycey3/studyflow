@@ -17,16 +17,6 @@ export async function Navbar() {
 
             {user && (
                 <>
-                    <div className="flex items-center gap-5">
-                        <Link href="/" className="link gap-1">
-                            <CalendarCheck size={16} strokeWidth={2} />
-                            Dashboard
-                        </Link>
-                        <Link href="/reflection" className="link gap-1">
-                            <NotebookPen size={16} strokeWidth={2} />
-                            Reflection
-                        </Link>
-                    </div>
                     <Button onClick={logout} variant="ghost" className="text-md font-semibold text-red-500 hover:bg-red-100">
                         <LogOut size={16} strokeWidth={3} />
                         Logout
