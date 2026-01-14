@@ -62,48 +62,6 @@ export async function addTask(_prevState: SubmitState, formData: FormData): Prom
     return { status: "success", message: "Task added successfully.", task: data as Task };
 }
 
-export async function updateTaskStatus(taskId: number, newStatus: string) {
-    const supabase = await createClient();
-
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-        throw new Error("User not authenticated.");
-    }
-
-    const userId = user.data.user.id;
-
-    const { error } = await supabase
-        .from("tasks")
-        .update({ status: newStatus })
-        .eq("id", taskId)
-        .eq("user_id", userId);
-
-    if (error) {
-        throw new Error(error.message);
-    }
-}
-
-export async function updateTaskPriority(taskId: number, newPriority: string) {
-    const supabase = await createClient();
-
-    const user = await supabase.auth.getUser();
-    if (!user.data.user) {
-        throw new Error("User not authenticated.");
-    }
-
-    const userId = user.data.user.id;
-
-    const { error } = await supabase
-        .from("tasks")
-        .update({ priority: newPriority })
-        .eq("id", taskId)
-        .eq("user_id", userId);
-
-    if (error) {
-        throw new Error(error.message);
-    }
-}
-
 export async function updateTask(_prevState: SubmitState, formData: FormData): Promise<SubmitState> {
     const supabase = await createClient();
 
@@ -169,4 +127,72 @@ export async function deleteTask(_prevState: SubmitState, formData: FormData): P
     }
 
     return { status: "success", message: "Task deleted successfully.", deletedId: id };
+}
+
+export async function updateTaskStatus(_prev: SubmitState, formData: FormData): Promise<SubmitState> {
+    const supabase = await createClient();
+
+    const { data: userRes } = await supabase.auth.getUser();
+    if (!userRes?.user) {
+        return { status: "error", message: "User not authenticated." };
+    }
+
+    const userId = userRes.user.id;
+    const id = Number(formData.get("id") ?? 0);
+    const status = String(formData.get("status") ?? "").trim() as Task["status"];
+
+    if (!id) return { status: "error", message: "Invalid task ID." };
+    if (!["todo", "doing", "done"].includes(status)) {
+        return { status: "error", message: "Invalid status value." };
+    }
+
+    const { data, error } = await supabase
+        .from("tasks")
+        .update({ status })
+        .eq("id", id)
+        .eq("user_id", userId)
+        .select("*")
+        .single();
+
+    if (error) {
+        return { status: "error", message: error.message };
+    }
+
+    if (!data) return { status: "error", message: "Task not found." };
+
+    return { status: "success", message: "Task status updated successfully.", task: data as Task };
+}
+
+export async function updateTaskPriority(_prev: SubmitState, formData: FormData): Promise<SubmitState> {
+    const supabase = await createClient();
+
+    const { data: userRes } = await supabase.auth.getUser();
+    if (!userRes.user) {
+        return { status: "error", message: "User not authenticated." };
+    }
+
+    const userId = userRes.user.id;
+    const id = Number(formData.get("id") ?? 0);
+    const priority = String(formData.get("priority") ?? "").trim() as Task["priority"];
+
+    if (!id) return { status: "error", message: "Invalid task ID." };
+    if (!["low", "medium", "high"].includes(priority)) {
+        return { status: "error", message: "Invalid priority value." };
+    }
+
+    const { data, error } = await supabase
+        .from("tasks")
+        .update({ priority })
+        .eq("id", id)
+        .eq("user_id", userId)
+        .select("*")
+        .single();
+
+    if (error) {
+        return { status: "error", message: error.message };
+    }
+
+    if (!data) return { status: "error", message: "Task not found." };
+
+    return { status: "success", message: "Task priority updated successfully.", task: data as Task };
 }

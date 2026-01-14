@@ -345,6 +345,7 @@ export default function Home() {
                         dueDate={task.due_date}
                         priority={task.priority}
                         status={task.status}
+                        onResult={handleResult}
                         onClick={() => {
                           setSelectedTask({
                             id: task.id,
