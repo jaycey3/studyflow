@@ -51,6 +51,24 @@ export async function login(_prevState: LoginState, formData: FormData ): Promis
         return { status: "error", message: error?.message || "Failed to verify OTP." };
     }
 
+    const userId = data.session.user.id;
+
+    await supabase.from("profiles").upsert({ id: userId }, { onConflict: "id" });
+
+    const { data: profile, error: profileErr } = await supabase
+    .from("profiles")
+    .select("name")
+    .eq("id", userId)
+    .single();
+
+    if (profileErr) {
+        return { status: "error", message: profileErr.message };
+    }
+
+    if (!profile?.name || profile.name.trim() === "") {
+        redirect("/onboarding");
+    }
+
     redirect("/");
 }
 

@@ -42,6 +42,7 @@ export default function Home() {
   const [toastOpen, setToastOpen] = useState(false);
   const [toastState, setToastState] = useState<SubmitState>({ status: "idle" });
   const [greeting, setGreeting] = useState(() => getGreeting());
+  const [name, setName] = useState<string>("");
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [upcoming, setUpcoming] = useState<Task[]>([]);
@@ -221,6 +222,15 @@ export default function Home() {
   }, [applyMutation]);
 
   useEffect(() => {
+    (async () => {
+      const res = await fetch(`/api/profile/me`, { method: "GET", cache: "no-store" }); 
+      if (!res.ok) return;
+      const data = await res.json();
+      setName(data.name ?? "");
+    })()
+  }, []);
+
+  useEffect(() => {
     const tick = () => setGreeting(getGreeting());
 
     tick();
@@ -269,7 +279,7 @@ export default function Home() {
   return (
     <div className="w-full flex flex-col gap-5 mt-5">
       <div className="flex items-center justify-between my-5">
-        <h1 className="text-4xl font-semibold mb-2">{greeting}, Jaycey! 👋</h1>
+        <h1 className="text-4xl font-semibold mb-2">{greeting}, {name}! 👋</h1>
         <AddTaskModal onResult={handleResult} />
         {editOpen && (
           <EditTaskModal isOpen={editOpen} onOpenChange={setEditOpen} task={selectedTask} onResult={handleResult} />
