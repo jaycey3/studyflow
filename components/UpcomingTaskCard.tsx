@@ -20,17 +20,17 @@ export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
     const priorityConfig = {
         low: {
             label: "Low",
-            className: "text-blue-500 bg-blue-100",
+            className: "text-blue-600 bg-blue-100",
             icon: <CircleMinus size={16} strokeWidth={3} />
         },
         medium: {
             label: "Medium",
-            className: "text-amber-500 bg-amber-100",
+            className: "text-amber-600 bg-amber-100",
             icon: <TriangleAlert size={16} strokeWidth={3} />
         },
         high: {
             label: "High",
-            className: "text-red-500 bg-red-100",
+            className: "text-red-600 bg-red-100",
             icon: <CircleAlert size={16} strokeWidth={3} />
         }
     };
@@ -38,17 +38,17 @@ export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
     const statusConfig = {
         todo: {
             label: "To Do",
-            className: "text-gray-500 bg-gray-100",
+            className: "text-gray-600 bg-gray-100",
             icon: <Circle size={16} strokeWidth={3} />
         },
         doing: {
             label: "Doing",
-            className: "text-amber-500 bg-amber-100",
+            className: "text-amber-600 bg-amber-100",
             icon: <Loader2 size={16} strokeWidth={3} />
         },
         done: {
             label: "Done",
-            className: "text-green-500 bg-green-100",
+            className: "text-green-600 bg-green-100",
             icon: <Check size={16} strokeWidth={3} />
         }
     };
