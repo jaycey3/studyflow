@@ -13,8 +13,6 @@ import StatusCard from "@/components/StatusCard";
 import EditTaskModal from "@/components/EditTaskModal";
 import type { Task } from "@/lib/tasks/actions";
 import type { SubmitState } from "@/lib/tasks/actions";
-import { today } from "@internationalized/date";
-import { get } from "http";
 
 type SelectedTask = {
   id: number;
@@ -306,7 +304,7 @@ export default function Home() {
         {days.map(day => (
           <Tabs.Panel key={day.key} id={day.key} className="pt-4">
             <div className="grid grid-cols-3 gap-5 mb-4">
-              <DailyProgress />
+              <DailyProgress tasks={tasks} />
               <FocusIntensity />
               <StatusCard />
             </div>
@@ -415,7 +413,6 @@ export default function Home() {
           </Modal.Container>
         </Modal.Backdrop>
       </Modal>
-
     </div>
   );
 }
