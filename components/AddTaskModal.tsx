@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState, useRef } from "react";
 import { Button, Input, Label, Modal, Surface, TextField, TextArea, DateField, DateInputGroup, Select, ListBox, Form } from "@heroui/react";
 import { Plus } from "lucide-react";
 import type { DateValue } from "@internationalized/date";
+import { CalendarDate, today, getLocalTimeZone } from "@internationalized/date";
 
 import { addTask, SubmitState } from "@/lib/tasks/actions";
 const initialState: SubmitState = { status: "idle" };
@@ -26,6 +27,12 @@ export function AddTaskModal({ onResult }: AddTaskModalProps) {
     useEffect(() => {
         onResultRef.current = onResult;
     }, [onResult]);
+
+    useEffect(() => {
+        if (isOpen) {
+            setDueDateValue(today(getLocalTimeZone()));
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (submitState.status === "success" || submitState.status === "error") {

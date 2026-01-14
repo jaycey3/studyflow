@@ -9,7 +9,7 @@ export async function Navbar() {
     const { data: { user } } = await supabase.auth.getUser();
 
     return (
-        <div className="py-4 flex items-center justify-between w-[80%] mx-auto sticky top-0 bg-gray-50 z-10">
+        <div className="py-4 flex items-center justify-between w-[70%] mx-auto sticky top-0 bg-gray-50 z-10">
             <Link href="/" className="link text-lg gap-2 font-semibold">
                 <GraduationCap size={24} strokeWidth={2} />
                 StudyFlow
