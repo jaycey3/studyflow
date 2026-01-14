@@ -44,9 +44,15 @@ export default function AuthPage() {
                         </Card.Header>
                         <Form action={formAction}>
                             <Card.Content>
-                                <TextField name="email" type="email">
+                                <TextField>
                                     <Label>Email</Label>
-                                    <Input placeholder="Enter your email" type="email" onChange={(e) => setEmail(e.target.value)} />
+                                    <Input 
+                                    name="email"
+                                    type="email"
+                                    value={email}
+                                    placeholder="Enter your email" 
+                                    autoComplete="email"
+                                    onChange={(e) => setEmail(e.target.value)} />
                                 </TextField>
                             </Card.Content>
                             <Card.Footer className="mt-4">
