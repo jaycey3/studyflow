@@ -4,8 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 
 export type SubmitState = 
 | { status: "idle" }
-| { status: "success"; message: string }
+| { status: "success"; message: string; task?: Task; deletedId?: number }
 | { status: "error"; message: string };
+
+export type Task = {
+    id: number;
+    title: string;
+    description: string;
+    priority: "low" | "medium" | "high";
+    status: "todo" | "doing" | "done";
+    due_date: string;
+    user_id: string;
+}
 
 function addDaysToDateString(yyyyMmDd: string, daysToAdd: number) {
     const [year, month, day] = yyyyMmDd.split("-").map(Number);
@@ -39,18 +49,20 @@ export async function addTask(_prevState: SubmitState, formData: FormData): Prom
         return { status: "error", message: "All fields are required." };
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from("tasks")
-        .insert([{ user_id: userId, title, description, due_date: dueDate, priority, status }]);
+        .insert([{ user_id: userId, title, description, due_date: dueDate, priority, status }])
+        .select("*")
+        .single();
 
     if (error) {
         return { status: "error", message: error.message };
     }
 
-    return { status: "success", message: "Task added successfully." };
+    return { status: "success", message: "Task added successfully.", task: data as Task };
 }
 
-export async function getTasksForDate(date: string) {
+export async function updateTaskStatus(taskId: number, newStatus: string) {
     const supabase = await createClient();
 
     const user = await supabase.auth.getUser();
@@ -60,21 +72,18 @@ export async function getTasksForDate(date: string) {
 
     const userId = user.data.user.id;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from("tasks")
-        .select("*")
-        .eq("user_id", userId)
-        .eq("due_date", date)
-        .order("due_date", { ascending: true });
+        .update({ status: newStatus })
+        .eq("id", taskId)
+        .eq("user_id", userId);
 
     if (error) {
         throw new Error(error.message);
     }
-
-    return data;
 }
 
-export async function getUpcomingTasks(fromDate: string, days = 7, limit = 5) {
+export async function updateTaskPriority(taskId: number, newPriority: string) {
     const supabase = await createClient();
 
     const user = await supabase.auth.getUser();
@@ -83,21 +92,81 @@ export async function getUpcomingTasks(fromDate: string, days = 7, limit = 5) {
     }
 
     const userId = user.data.user.id;
-    
-    const endDate = addDaysToDateString(fromDate, days);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
         .from("tasks")
-        .select("*")
-        .eq("user_id", userId)
-        .gte("due_date", fromDate)
-        .lte("due_date", endDate)
-        .order("due_date", { ascending: true })
-        .limit(limit);
+        .update({ priority: newPriority })
+        .eq("id", taskId)
+        .eq("user_id", userId);
 
     if (error) {
         throw new Error(error.message);
     }
+}
 
-    return data;
+export async function updateTask(_prevState: SubmitState, formData: FormData): Promise<SubmitState> {
+    const supabase = await createClient();
+
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+        return { status: "error", message: "User not authenticated." };
+    }
+
+    const userId = user.data.user.id;
+
+    const id = Number(formData.get("id") ?? 0);
+
+    if (!id) return { status: "error", message: "Invalid task ID." };
+
+    const title = String(formData.get("title") ?? "").trim();
+    const description = String(formData.get("description") ?? "").trim();
+    const dueDate = String(formData.get("dueDate") ?? "").trim();
+    const priority = String(formData.get("priority") ?? "").trim();
+    const status = String(formData.get("status") ?? "").trim();
+
+    if (!title || !description || !dueDate || !priority || !status) {
+        return { status: "error", message: "All fields are required." };
+    }
+
+    const { data, error } = await supabase
+        .from("tasks")
+        .update({ title, description, due_date: dueDate, priority, status })
+        .eq("id", id)
+        .eq("user_id", userId)
+        .select("*")
+        .single();
+
+    if (error) {
+        return { status: "error", message: error.message };
+    }
+
+    return { status: "success", message: "Task updated successfully.", task: data as Task };
+}
+
+export async function deleteTask(_prevState: SubmitState, formData: FormData): Promise<SubmitState> {
+    const supabase = await createClient();
+
+    const user = await supabase.auth.getUser();
+    if (!user.data.user) {
+        return { status: "error", message: "User not authenticated." };
+    }
+
+    const userId = user.data.user.id;
+
+    const id = Number(formData.get("id") ?? 0);
+    if (!id) {
+        return { status: "error", message: "Invalid task ID." };
+    }
+
+    const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", userId);
+
+    if (error) {
+        return { status: "error", message: error.message };
+    }
+
+    return { status: "success", message: "Task deleted successfully.", deletedId: id };
 }

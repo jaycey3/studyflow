@@ -3,13 +3,16 @@
 import { Card, Chip, Button, Select, ListBox } from "@heroui/react";
 import { Trash, SquarePen, Circle, CircleMinus, Check, CircleAlert, TriangleAlert, Loader2, CalendarClock } from "lucide-react";
 import { useState } from "react";
+import EditTaskModal from "@/components/EditTaskModal";
 
 type TaskCardProps = {
-    priority: "low" | "medium" | "high";
-    status: "todo" | "doing" | "done";
+    id: number;
     title: string;
     description: string;
     dueDate: string;
+    priority: "low" | "medium" | "high";
+    status: "todo" | "doing" | "done";
+    onClick?: () => void;
 }
 
 export default function TaskCard(props: TaskCardProps) {
@@ -60,12 +63,14 @@ export default function TaskCard(props: TaskCardProps) {
         day: "numeric",
     });
 
+
+
     return (
-        <Card className="min-w-0 p-4">
+        <Card className="min-w-0 p-4" onClick={props.onClick}>
             <Card.Content className="grid grid-cols-2 p-2">
                 <div className="">
                     <div className="flex items-center gap-2">
-                        <Select defaultValue={selectedStatus} onChange={(key) => setSelectedStatus(key as TaskCardProps["status"])}>
+                        <Select defaultValue={selectedStatus} onChange={(key) => setSelectedStatus(key as TaskCardProps["status"])} onClick={(e) => e.stopPropagation()}>
                             <Select.Trigger className={`${selectedStatusConfig.className} bg-transparent w-auto p-0`} aria-label="Change Status">
                                 <Chip className={`${selectedStatusConfig.className} h-7`} size="md">
                                     {selectedStatusConfig.icon} {selectedStatusConfig.label}
@@ -79,7 +84,7 @@ export default function TaskCard(props: TaskCardProps) {
                                 </ListBox>
                             </Select.Popover>
                         </Select>
-                        <Select defaultValue={selectedPriority} onChange={(key) => setSelectedPriority(key as TaskCardProps["priority"])}>
+                        <Select defaultValue={selectedPriority} onChange={(key) => setSelectedPriority(key as TaskCardProps["priority"])} onClick={(e) => e.stopPropagation()}>
                             <Select.Trigger className={`${selectedPriorityConfig.className} bg-transparent w-auto p-0`} aria-label="Change Priority">
                                 <Chip className={`${selectedPriorityConfig.className} h-7`} size="md">
                                     {selectedPriorityConfig.icon} {selectedPriorityConfig.label}

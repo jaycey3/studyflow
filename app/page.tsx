@@ -1,8 +1,8 @@
 "use client";
 
-import { Tabs, Button, Chip } from "@heroui/react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useEffect, useState, useMemo, useTransition } from "react";
+import { Tabs, Button, Chip, Modal } from "@heroui/react";
+import { ArrowLeft, ArrowRight, CheckCircle, XCircle } from "lucide-react";
+import { useEffect, useState, useMemo, useTransition, useCallback, use } from "react";
 
 import { AddTaskModal } from "@/components/AddTaskModal";
 import TaskCard from "@/components/TaskCard";
@@ -10,16 +10,18 @@ import UpcomingTaskCard from "@/components/UpcomingTaskCard";
 import DailyProgress from "@/components/DailyProgress";
 import FocusIntensity from "@/components/FocusIntensity";
 import StatusCard from "@/components/StatusCard";
+import EditTaskModal from "@/components/EditTaskModal";
+import type { Task } from "@/lib/tasks/actions";
+import type { SubmitState } from "@/lib/tasks/actions";
+import { today } from "@internationalized/date";
 
-import { getTasksForDate, getUpcomingTasks } from "@/lib/tasks/actions";
-
-type Task = {
-  id: string;
+type SelectedTask = {
+  id: number;
   title: string;
   description: string;
   priority: "low" | "medium" | "high";
   status: "todo" | "doing" | "done";
-  due_date: string;
+  dueDate: string;
 }
 
 function toDateKeyLocal(date: Date) {
@@ -35,8 +37,11 @@ function fromDateKeyLocal(key: string) {
 }
 
 export default function Home() {
-  const [days, setDays] = useState<any[]>([]);
-  const [selectedKey, setSelectedKey] = useState<string | undefined>(undefined);
+  const [selectedKey, setSelectedKey] = useState<string>("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<SelectedTask | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastState, setToastState] = useState<SubmitState>({ status: "idle" });
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [upcoming, setUpcoming] = useState<Task[]>([]);
@@ -60,11 +65,76 @@ export default function Home() {
     })
   }
 
-  const refreshDayTasks = (dateKey: string) => {
+  function upsert(list: Task[], task: Task) {
+    const exists = list.some((x) => x.id === task.id);
+    const next = exists ? list.map((x) => (x.id === task.id ? task : x)) : [task, ...list];
+    return next.sort((a, b) => a.due_date.localeCompare(b.due_date));
+  }
+
+  function removeById(list: Task[], id: number) {
+    return list.filter((x) => x.id !== id);
+  }
+
+  function addDaysLocal(yyyyMmDd: string, days: number) {
+    const [year, month, day] = yyyyMmDd.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() + days);
+
+    const yy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  function inUpcomingrange(due: string, fromDate: string, days = 7) {
+    const end = addDaysLocal(fromDate, days);
+    return due >= fromDate && due <= end;
+  }
+
+  const applyMutation = useCallback((state: SubmitState) => {
+    if (state.status !== "success") return;
+
+    if (typeof state.deletedId === "number") {
+      const id = state.deletedId;
+      setTasks((cur) => removeById(cur, id));
+      setUpcoming((cur) => removeById(cur, id));
+      return;
+    }
+
+    if (state.task) {
+      const task = state.task;
+
+      setTasks((cur) => {
+        if (!selectedKey) return cur;
+        const onSelectedDay = task.due_date === selectedKey;
+        if (!onSelectedDay) return removeById(cur, task.id);
+        return upsert(cur, task);
+      })
+
+      setUpcoming((cur) => {
+        const inRange = inUpcomingrange(task.due_date, todayKey, 7);
+        if (!inRange) return removeById(cur, task.id);
+
+        const next = upsert(cur, task);
+        return next.slice(0, 5);
+      })
+    }
+  }, [selectedKey, todayKey]);
+
+  const fetchDayTasks = (dateKey: string) => {
     setError(null);
     startTransition(async () => {
       try {
-        const data = await getTasksForDate(dateKey);
+        const res = await fetch(`/api/tasks/day?date=${encodeURIComponent(dateKey)}`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error((await res.json()).error ?? "Failed to fetch tasks.");
+        }
+        const data = await res.json();
         setTasks((data ?? []) as Task[]);
       } catch (e: any) {
         setError(e?.message ?? "An error occurred while fetching tasks.");
@@ -73,21 +143,23 @@ export default function Home() {
     })
   }
 
-  const refreshUpcoming = (fromDateKey: string) => {
+  const fetchUpcomingTasks = (fromDateKey: string) => {
     startTransition(async () => {
       try {
-        const data = await getUpcomingTasks(fromDateKey, 7, 5);
+        const res = await fetch(`/api/tasks/upcoming?fromDate=${encodeURIComponent(fromDateKey)}&days=7&limit=5`, {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error((await res.json()).error ?? "Failed to fetch upcoming tasks.");
+        }
+        const data = await res.json();
         setUpcoming((data ?? []) as Task[]);
       } catch {
         setUpcoming([]);
       }
     })
-  }
-
-  const refreshAll = () => {
-    if (!selectedKey) return;
-    refreshDayTasks(selectedKey);
-    refreshUpcoming(todayKey);
   }
 
   const shiftSelectedBy = (delta: number) => {
@@ -102,23 +174,52 @@ export default function Home() {
     return selectedKey === todayKey;
   }, [selectedKey, todayKey]);
 
-  useEffect(() => {
-    const now = new Date();
-    const key = toDateKeyLocal(now);
+  const handleResult = useCallback((state: SubmitState) => {
+    setToastState((prev) => {
+      const prevMsg = "message" in prev ? prev.message : "";
+      const nextMsg = "message" in state ? state.message : "";
 
-    setSelectedKey(key);
-    setDays(getWindowAround(now));
+      if (prev.status === state.status && prevMsg === nextMsg) {
+        return prev;
+      }
+      return state;
+    });
+
+    if (state.status === "success") {
+      applyMutation(state);
+    }
+  }, [applyMutation]);
+
+  useEffect(() => {
+    setSelectedKey(toDateKeyLocal(new Date()));
+    // setDays(getWindowAround(now));
   }, []);
+
+  const days = useMemo(() => {
+    if (!selectedKey) return [];
+    return getWindowAround(fromDateKeyLocal(selectedKey));
+  }, [selectedKey]);
 
   useEffect(() => {
     if (!selectedKey) return;
+    fetchDayTasks(selectedKey);
+  }, [selectedKey]);
 
-    const center = fromDateKeyLocal(selectedKey);
-    setDays(getWindowAround(center));
+  useEffect(() => {
+    fetchUpcomingTasks(todayKey);
+  }, [todayKey]);
 
-    refreshDayTasks(selectedKey);
-    refreshUpcoming(todayKey);
-  }, [selectedKey, todayKey]);
+  useEffect(() => {
+    if (toastState.status === "success" || toastState.status === "error") {
+      setToastOpen(true);
+
+      const timer = setTimeout(() => {
+        setToastOpen(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [toastState.status])
 
   if (days.length === 0) return null;
 
@@ -127,7 +228,10 @@ export default function Home() {
     <div className="w-full flex flex-col gap-5 mt-5">
       <div className="flex items-center justify-between my-5">
         <h1 className="text-4xl font-semibold mb-2">Good Morning, Jaycey! 👋</h1>
-        <AddTaskModal onSuccess={refreshAll} />
+        <AddTaskModal onResult={handleResult} />
+        {editOpen && (
+          <EditTaskModal isOpen={editOpen} onOpenChange={setEditOpen} task={selectedTask} onResult={handleResult} />
+        )}
       </div>
       <Tabs
         hideSeparator
@@ -189,7 +293,7 @@ export default function Home() {
               <StatusCard />
             </div>
 
-            <div className="grid grid-cols-[2fr_1fr] gap-10">
+            <div className="grid grid-cols-[2fr_1fr] gap-5">
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
@@ -219,11 +323,23 @@ export default function Home() {
                     tasks.map((task) => (
                       <TaskCard
                         key={task.id}
+                        id={task.id}
                         title={task.title}
                         description={task.description}
+                        dueDate={task.due_date}
                         priority={task.priority}
                         status={task.status}
-                        dueDate={task.due_date}
+                        onClick={() => {
+                          setSelectedTask({
+                            id: task.id,
+                            title: task.title,
+                            description: task.description,
+                            dueDate: task.due_date,
+                            priority: task.priority,
+                            status: task.status,
+                          });
+                          setEditOpen(true);
+                        }}
                       />
                     ))
                   )}
@@ -256,6 +372,32 @@ export default function Home() {
           </Tabs.Panel>
         ))}
       </Tabs>
+      <Modal isOpen={toastOpen} onOpenChange={setToastOpen}>
+        <Modal.Backdrop variant="transparent">
+          <Modal.Container placement="top" size="xs">
+            <Modal.Dialog>
+              <Modal.Body>
+                <div
+                  className={[
+                    toastState.status === "success" ? "text-green-500" :
+                      toastState.status === "error" ? "text-red-500" :
+                        "text-neutral-900",
+                    "flex items-center gap-2"
+                  ].join(" ")}
+                >
+                  {toastState.status === "success" ? (
+                    <CheckCircle size={20} className="inline mr-2" />
+                  ) : toastState.status === "error" ? (
+                    <XCircle size={20} className="inline mr-2" />
+                  ) : null}
+                  {"message" in toastState ? toastState.message : ""}
+                </div>
+              </Modal.Body>
+            </Modal.Dialog>
+          </Modal.Container>
+        </Modal.Backdrop>
+      </Modal>
+
     </div>
   );
 }
