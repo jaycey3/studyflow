@@ -35,6 +35,10 @@ function fromDateKeyLocal(key: string) {
   return new Date(year, month - 1, day);
 }
 
+function isTaskOverdue(task: Task, todayKey: string) {
+  return task.status !== "done" && task.due_date < todayKey;
+}
+
 export default function Home() {
   const [selectedKey, setSelectedKey] = useState<string>("");
   const [editOpen, setEditOpen] = useState(false);
@@ -51,6 +55,16 @@ export default function Home() {
   const [isPending, startTransition] = useTransition();
 
   const todayKey = useMemo(() => toDateKeyLocal(new Date()), []);
+
+  const overdueDayKeys = useMemo(() => {
+  const set = new Set<string>();
+  for (const task of allTasks) {
+    if (isTaskOverdue(task, todayKey)) {
+      set.add(task.due_date);
+    }
+  }
+  return set;
+}, [allTasks, todayKey]);
 
   function getGreeting(date = new Date()) {
     const hour = date.getHours();
@@ -315,11 +329,16 @@ export default function Home() {
 
             <div className="flex justify-center">
               <Tabs.List className="h-24 gap-5 bg-transparent flex justify-center w-fit mx-auto">
-                {days.map(day => (
+                {days.map((day) => {
+                  const hasOverdue = overdueDayKeys.has(day.key);
+
+                  return (
                   <Tabs.Tab
                     key={day.key}
                     id={day.key}
-                    className="h-24 w-24 bg-gray-50 border-2 border-gray-200 rounded-3xl data-selected:border-blue-600 data-selected:border-4 data-selected:text-neutral-900 data-selected:bg-white"
+                    className={["h-24 w-24 bg-gray-50 border-2 border-gray-200 rounded-3xl",
+                    "data-selected:border-blue-600 data-selected:border-4 data-selected:text-neutral-900 data-selected:bg-white",
+                    hasOverdue ? "border-red-400 border-3" : ""].join(" ")}
                   >
                     <div className="flex flex-col items-center">
                       <span>{day.weekday}</span>
@@ -327,7 +346,7 @@ export default function Home() {
                       <span className="text-xs text-neutral-500">{day.month}</span>
                     </div>
                   </Tabs.Tab>
-                ))}
+                )})}
               </Tabs.List>
             </div>
 
