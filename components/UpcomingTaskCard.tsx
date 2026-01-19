@@ -38,7 +38,7 @@ export default function UpcomingTaskCard(props: UpcomingTaskCardProps) {
     const statusConfig = {
         todo: {
             label: "To Do",
-            className: "text-gray-600 bg-gray-100",
+            className: "text-blue-600 bg-blue-100",
             icon: <Circle size={16} strokeWidth={3} />
         },
         doing: {

@@ -52,7 +52,7 @@ export default function TaskCard(props: TaskCardProps) {
     }), []);
 
     const statusConfig = useMemo(() => ({
-        todo: { label: "To Do", className: "text-gray-600 bg-gray-100", icon: <Circle size={16} strokeWidth={3} /> },
+        todo: { label: "To Do", className: "text-blue-600 bg-blue-100", icon: <Circle size={16} strokeWidth={3} /> },
         doing: { label: "Doing", className: "text-amber-600 bg-amber-100", icon: <Loader2 size={16} strokeWidth={3} className="animate-spin" /> },
         done: { label: "Done", className: "text-green-600 bg-green-100", icon: <Check size={16} strokeWidth={3} /> },
     }), []);
@@ -91,7 +91,7 @@ export default function TaskCard(props: TaskCardProps) {
                                 </Select.Trigger>
                                 <Select.Popover>
                                     <ListBox>
-                                        <ListBox.Item id="todo" className="text-gray-600 hover:bg-gray-100"><Circle size={16} strokeWidth={3} /> To Do</ListBox.Item>
+                                        <ListBox.Item id="todo" className="text-blue-600 hover:bg-blue-100"><Circle size={16} strokeWidth={3} /> To Do</ListBox.Item>
                                         <ListBox.Item id="doing" className="text-amber-600 hover:bg-amber-100"><Loader2 size={16} strokeWidth={3} /> Doing</ListBox.Item>
                                         <ListBox.Item id="done" className="text-green-600 hover:bg-green-100"><Check size={16} strokeWidth={3} /> Done</ListBox.Item>
                                     </ListBox>
